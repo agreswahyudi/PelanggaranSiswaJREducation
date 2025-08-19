@@ -1,58 +1,132 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Cek Pelanggaran Siswa</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    th { background-color: #f2f2f2; }
-    input, button { padding: 10px; font-size: 16px; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      max-width: 600px;
+      background-color: #cce5ff; /* biru muda */
+      padding: 20px;
+      border-radius: 10px;
+      box-sizing: border-box;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .container {
+      text-align: center;
+    }
+    img.logo {
+      width: 100px;
+      height: auto;
+      margin-bottom: 10px;
+    }
+    h2 {
+      margin-top: 0;
+      color: #003366;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+      margin-top: 10px;
+      width: calc(100% - 24px);
+      box-sizing: border-box;
+      border: 1px solid #003366;
+      border-radius: 5px;
+    }
+    button {
+      background-color: #003366;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #002244;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #0059b3;
+      color: white;
+    }
+    #result p {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #003366;
+    }
   </style>
 </head>
 <body>
-  <h2>Cek Pelanggaran Siswa</h2>
-  <input type="text" id="studentName" placeholder="Masukkan nama siswa...">
-  <button onclick="fetchData()">Cari</button>
+  <div class="container">
+    <img class="logo" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS_azdalT6mpOq9b05Qm5R8UXdl9EYsb3ofKw&s" alt="Logo" />
+    <h2>Cek Pelanggaran Siswa</h2>
+    <input type="text" id="studentName" placeholder="Masukkan nama siswa..." />
+    <button onclick="fetchData()">Cari</button>
 
-  <div id="result"></div>
+    <div id="result"></div>
+  </div>
 
   <script>
-const SHEET_ID = '1LWHkjnO6BZ-QC9CjxEStDiqklgQ_ZYSFoVgLtokf3PM';
-const SHEET_NAME = 'Sheet1'; // Sesuaikan dengan nama tab sheet di Google Sheets
-const API_URL = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
+    const SHEET_ID = '1LWHkjnO6BZ-QC9CjxEStDiqklgQ_ZYSFoVgLtokf3PM';
+    const SHEET_NAME = 'Sheet1';
+    const API_URL = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
 
     async function fetchData() {
       const nameInput = document.getElementById('studentName').value.trim().toLowerCase();
+      const resultDiv = document.getElementById('result');
+      resultDiv.innerHTML = '';
+
       if (!nameInput) {
-        document.getElementById('result').innerHTML = '<p>Mohon masukkan nama siswa.</p>';
+        resultDiv.innerHTML = '<p>Mohon masukkan nama siswa.</p>';
         return;
       }
 
       try {
         const response = await fetch(API_URL);
+        if (!response.ok) throw new Error('Gagal mengambil data');
         const data = await response.json();
+
+        // Filter data sesuai nama siswa (case-insensitive)
         const records = data.filter(r => r['Nama Siswa']?.toLowerCase() === nameInput);
 
         if (records.length === 0) {
-          document.getElementById('result').innerHTML = `<p>Tidak ada data pelanggaran untuk <b>${nameInput}</b>.</p>`;
-        } else {
-          let total = 0;
-          let html = `<table><tr><th>Tanggal</th><th>Pelanggaran</th><th>Poin</th></tr>`;
-          records.forEach(r => {
-            html += `<tr><td>${r['Tanggal']}</td><td>${r['Pelanggaran']}</td><td>${r['Poin']}</td></tr>`;
-            total += parseInt(r['Poin']) || 0;
-          });
-          html += `<tr><td colspan="2"><b>Total Poin</b></td><td><b>${total}</b></td></tr></table>`;
-          document.getElementById('result').innerHTML = html;
+          resultDiv.innerHTML = `<p>Tidak ada data pelanggaran untuk <b>${nameInput}</b>.</p>`;
+          return;
         }
-      } catch (err) {
-        console.error(err);
-        document.getElementById('result').innerHTML = `<p>Terjadi kesalahan saat mengambil data.</p>`;
+
+        let totalPoin = 0;
+        let html = `<table><tr><th>Tanggal</th><th>Pelanggaran</th><th>Poin</th></tr>`;
+
+        records.forEach(r => {
+          html += `<tr>
+            <td>${r['Tanggal'] || '-'}</td>
+            <td>${r['Pelanggaran'] || '-'}</td>
+            <td>${r['Poin'] || 0}</td>
+          </tr>`;
+          totalPoin += parseInt(r['Poin']) || 0;
+        });
+
+        html += `<tr><td colspan="2"><b>Total Poin</b></td><td><b>${totalPoin}</b></td></tr></table>`;
+
+        resultDiv.innerHTML = html;
+
+      } catch (error) {
+        console.error(error);
+        resultDiv.innerHTML = '<p>Terjadi kesalahan saat mengambil data.</p>';
       }
     }
   </script>
 </body>
 </html>
-
