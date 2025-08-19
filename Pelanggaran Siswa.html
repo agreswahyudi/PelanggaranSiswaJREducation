@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Cek Pelanggaran Siswa</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+    input, button { padding: 10px; font-size: 16px; }
+  </style>
+</head>
+<body>
+  <h2>Cek Pelanggaran Siswa</h2>
+  <input type="text" id="studentName" placeholder="Masukkan nama siswa...">
+  <button onclick="fetchData()">Cari</button>
+
+  <div id="result"></div>
+
+  <script>
+    const SHEET_ID = '2PACX-1vSi1KCqBmNpHfvUdI9kOnjGLKSGRf7k3dBz8tJgr8k8ldD2_c1xtsZvio_PW5IcuK9KRlUlGGpM5H_N';
+    const SHEET_NAME = 'Sheet1'; // Ganti jika nama sheet-nya berbeda
+    const API_URL = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
+
+    async function fetchData() {
+      const nameInput = document.getElementById('studentName').value.trim().toLowerCase();
+      if (!nameInput) {
+        document.getElementById('result').innerHTML = '<p>Mohon masukkan nama siswa.</p>';
+        return;
+      }
+
+      try {
+        const response = await fetch(API_URL);
+        const data = await response.json();
+        const records = data.filter(r => r['Nama Siswa']?.toLowerCase() === nameInput);
+
+        if (records.length === 0) {
+          document.getElementById('result').innerHTML = `<p>Tidak ada data pelanggaran untuk <b>${nameInput}</b>.</p>`;
+        } else {
+          let total = 0;
+          let html = `<table><tr><th>Tanggal</th><th>Pelanggaran</th><th>Poin</th></tr>`;
+          records.forEach(r => {
+            html += `<tr><td>${r['Tanggal']}</td><td>${r['Pelanggaran']}</td><td>${r['Poin']}</td></tr>`;
+            total += parseInt(r['Poin']) || 0;
+          });
+          html += `<tr><td colspan="2"><b>Total Poin</b></td><td><b>${total}</b></td></tr></table>`;
+          document.getElementById('result').innerHTML = html;
+        }
+      } catch (err) {
+        console.error(err);
+        document.getElementById('result').innerHTML = `<p>Terjadi kesalahan saat mengambil data.</p>`;
+      }
+    }
+  </script>
+</body>
+</html>
