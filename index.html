@@ -4,18 +4,25 @@
   <meta charset="UTF-8" />
   <title>Cek Pelanggaran Siswa</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      max-width: 600px;
-      background-color: #cce5ff; /* biru muda */
-      padding: 20px;
-      border-radius: 10px;
+    * {
       box-sizing: border-box;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: Arial, sans-serif;
+      background-color: #cce5ff; /* biru muda */
     }
     .container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
       text-align: center;
+      padding: 20px;
     }
     img.logo {
       width: 100px;
@@ -30,8 +37,8 @@
       padding: 10px;
       font-size: 16px;
       margin-top: 10px;
-      width: calc(100% - 24px);
-      box-sizing: border-box;
+      width: 100%;
+      max-width: 400px;
       border: 1px solid #003366;
       border-radius: 5px;
     }
@@ -46,6 +53,7 @@
     }
     table {
       width: 100%;
+      max-width: 600px;
       border-collapse: collapse;
       margin-top: 20px;
       background: white;
