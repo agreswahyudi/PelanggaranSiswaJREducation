@@ -2,80 +2,61 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Cek ID Card Siswa</title>
+  <title>ID Card Siswa</title>
   <style>
     body {
       font-family: Arial, sans-serif;
+      background-color: #e6f2ff;
       text-align: center;
-      padding: 50px;
-      background: #e3f2fd;
+      margin-top: 50px;
     }
     .card {
       display: inline-block;
       padding: 20px;
-      border: 2px solid #0d47a1;
-      border-radius: 10px;
-      background: white;
-      box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+      border: 2px solid #0077cc;
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
-    .valid {
-      color: green;
-      font-weight: bold;
-      margin-top: 20px;
-    }
-    .invalid {
-      color: red;
-      font-weight: bold;
-      margin-top: 20px;
+    img {
+      margin-top: 15px;
+      width: 150px;
+      border-radius: 8px;
+      border: 2px solid #0077cc;
     }
   </style>
 </head>
 <body>
-  <h2>Cek ID Card Siswa</h2>
-  <input type="text" id="nisInput" placeholder="Masukkan NIS siswa...">
-  <button onclick="cekIDCard()">Cek</button>
-
-  <div id="result"></div>
+  <div class="card">
+    <h2>Siswa berikut merupakan siswa JR Education</h2>
+    <p id="nis"></p>
+    <img id="foto" src="" alt="Foto Siswa">
+  </div>
 
   <script>
-    const SHEET_ID = "1LWHkjnO6BZ-QC9CjxEStDiqklgQ_ZYSFoVgLtokf3PM"; 
-    const SHEET_NAME = "IDCard"; // tab baru untuk data ID Card
-    const API_URL = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
+    // Ambil parameter NIS dari URL
+    const params = new URLSearchParams(window.location.search);
+    const nis = params.get("nis");
+    document.getElementById("nis").innerText = "NIS: " + nis;
 
-    async function cekIDCard() {
-      const nis = document.getElementById('nisInput').value.trim();
-      const resultDiv = document.getElementById('result');
-      resultDiv.innerHTML = '';
+    // Link JSON dari Google Sheet via opensheet
+    const sheetURL = "https://opensheet.elk.sh/1LWHkjnO6BZ-QC9CjxEStDiqklgQ_ZYSfoVgLtokf3PM/ID%20CARD";
 
-      if (!nis) {
-        resultDiv.innerHTML = '<p>Mohon masukkan NIS siswa.</p>';
-        return;
-      }
-
-      try {
-        const response = await fetch(API_URL);
-        const data = await response.json();
-
-        // Cari siswa berdasarkan NIS
-        const siswa = data.find(r => r['NIS'] === nis);
-
+    fetch(sheetURL)
+      .then(res => res.json())
+      .then(data => {
+        // Cari siswa sesuai NIS
+        const siswa = data.find(s => s.NIS === nis);
         if (siswa) {
-          resultDiv.innerHTML = `
-            <div class="card">
-              <h3>${siswa['Nama Siswa']}</h3>
-              <p>NIS: ${siswa['NIS']}</p>
-              <p class="valid">${siswa['Status']}</p>
-            </div>
-          `;
+          document.getElementById("foto").src = siswa.FOTO;
         } else {
-          resultDiv.innerHTML = `<p class="invalid">Data siswa dengan NIS ${nis} tidak ditemukan.</p>`;
+          document.getElementById("foto").alt = "Data siswa tidak ditemukan";
         }
-
-      } catch (error) {
-        console.error(error);
-        resultDiv.innerHTML = '<p>Terjadi kesalahan saat mengambil data.</p>';
-      }
-    }
+      })
+      .catch(err => {
+        document.getElementById("foto").alt = "Gagal memuat foto";
+        console.error(err);
+      });
   </script>
 </body>
 </html>
