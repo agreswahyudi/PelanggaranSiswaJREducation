@@ -2,44 +2,74 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>ID Card Siswa</title>
+  <title>ID Card Siswa JR EDUCATION</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 30px;
+      background: #f4f6f9;
+    }
+    .card {
+      display: inline-block;
+      padding: 20px;
+      border: 2px solid #333;
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    img {
+      width: 150px;
+      height: auto;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+    h2 {
+      margin-bottom: 10px;
+      color: #222;
+    }
+    p {
+      margin: 6px 0;
+      font-size: 16px;
+    }
+  </style>
 </head>
-<body style="text-align:center; font-family:Arial; background:#E6F2FF;">
-
-  <h2>Cek ID Card Siswa</h2>
-  <div id="hasil"></div>
+<body>
+  <div id="hasil">
+    <p>Sedang memuat data siswa...</p>
+  </div>
 
   <script>
     // Ambil parameter dari URL (?nis=...)
     const params = new URLSearchParams(window.location.search);
     const nis = params.get("nis");
 
-    // Link ke opensheet (sheet ID kamu + nama sheet "ID CARD")
-    const sheetURL = "https://opensheet.elk.sh/1LWHkjnO6BZ-QC9CjxEStDiqklgQ_ZYSfoVgLtokf3PM/ID%20CARD";
+    // Link JSON dari Google Sheet (pakai opensheet.elk.sh)
+    const sheetURL = "https://opensheet.elk.sh/1LWHkjnO6BZ-QC9CjxEStDiqklgQ_ZYSFoVgLtokf3PM/IDCard";
 
     fetch(sheetURL)
       .then(res => res.json())
       .then(data => {
-        console.log("Data dari sheet:", data); // debug
         const siswa = data.find(s => s.NIS === nis);
-
         const hasilDiv = document.getElementById("hasil");
 
         if (siswa) {
           hasilDiv.innerHTML = `
-            <h3>Siswa berikut merupakan siswa JR EDUCATION</h3>
-            <p><b>Nama:</b> ${siswa.NAMA}</p>
-            <p><b>Sekolah:</b> ${siswa.SEKOLAH}</p>
-            <p><b>NIS:</b> ${siswa.NIS}</p>
-            <img src="${siswa.FOTO}" alt="Foto Siswa" style="width:150px; border:2px solid #333;">
+            <div class="card">
+              <h2>Siswa berikut merupakan siswa JR EDUCATION</h2>
+              <p><b>Nama:</b> ${siswa.NAMA}</p>
+              <p><b>NIS:</b> ${siswa.NIS}</p>
+              <p><b>Sekolah:</b> ${siswa.SEKOLAH || "-"}</p>
+              <img src="${siswa.FOTO}" alt="Foto Siswa">
+            </div>
           `;
         } else {
-          hasilDiv.innerHTML = "<p style='color:red'>Data siswa tidak ditemukan</p>";
+          hasilDiv.innerHTML = "<p style='color:red'>❌ Data siswa tidak ditemukan</p>";
         }
       })
       .catch(err => {
         console.error("Error:", err);
-        document.getElementById("hasil").innerHTML = "<p style='color:red'>Terjadi kesalahan saat mengambil data</p>";
+        document.getElementById("hasil").innerHTML = "<p style='color:red'>⚠️ Terjadi kesalahan saat mengambil data</p>";
       });
   </script>
 </body>
