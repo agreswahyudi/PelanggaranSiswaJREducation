@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Verifikasi Siswa JR Education</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f0f8ff; text-align: center; padding: 20px; }
+    .card {
+      max-width: 400px; margin: auto; padding: 20px;
+      background: white; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    img { max-width: 150px; border-radius: 8px; margin: 10px 0; }
+    h2 { color: #003366; }
+    p { font-size: 18px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Verifikasi Siswa</h2>
+    <div id="result">Memuat data...</div>
+  </div>
+
+  <script>
+    const SHEET_ID = "1LWHkjnO6BZ-QC9CjxEStDiqklgQ_ZYSFoVgLtokf3PM"; // ganti dengan ID spreadsheet Anda
+    const SHEET_NAME = "DATABASE SISWA"; // nama sheet
+    const API_URL = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
+
+    async function verifyStudent() {
+      const params = new URLSearchParams(window.location.search);
+      const nis = params.get("nis");
+      const resultDiv = document.getElementById("result");
+
+      if (!nis) {
+        resultDiv.innerHTML = "<p>ID/NIS tidak ditemukan di URL.</p>";
+        return;
+      }
+
+      try {
+        const response = await fetch(API_URL);
+        const data = await response.json();
+
+        const student = data.find(r => r["NIS"] === nis);
+
+        if (student) {
+          resultDiv.innerHTML = `
+            <img src="${student["FOTO"]}" alt="Foto Siswa">
+            <p><b>Nama:</b> ${student["NAMA"]}</p>
+            <p><b>Sekolah:</b> ${student["SEKOLAH"]}</p>
+            <p style="color:green;"><b>Status:</b> Benar siswa JR Education ✅</p>
+          `;
+        } else {
+          resultDiv.innerHTML = "<p style='color:red;'>Data siswa tidak ditemukan.</p>";
+        }
+      } catch (error) {
+        resultDiv.innerHTML = "<p>Gagal mengambil data.</p>";
+      }
+    }
+
+    verifyStudent();
+  </script>
+</body>
+</html>
