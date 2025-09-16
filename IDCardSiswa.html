@@ -2,36 +2,53 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Verifikasi Siswa JR Education</title>
+  <title>Cek ID Card Siswa</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #f0f8ff; text-align: center; padding: 20px; }
-    .card {
-      max-width: 400px; margin: auto; padding: 20px;
-      background: white; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 50px;
+      background: #e3f2fd;
     }
-    img { max-width: 150px; border-radius: 8px; margin: 10px 0; }
-    h2 { color: #003366; }
-    p { font-size: 18px; }
+    .card {
+      display: inline-block;
+      padding: 20px;
+      border: 2px solid #0d47a1;
+      border-radius: 10px;
+      background: white;
+      box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+    }
+    .valid {
+      color: green;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+    .invalid {
+      color: red;
+      font-weight: bold;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h2>Verifikasi Siswa</h2>
-    <div id="result">Memuat data...</div>
-  </div>
+  <h2>Cek ID Card Siswa</h2>
+  <input type="text" id="nisInput" placeholder="Masukkan NIS siswa...">
+  <button onclick="cekIDCard()">Cek</button>
+
+  <div id="result"></div>
 
   <script>
-    const SHEET_ID = "1LWHkjnO6BZ-QC9CjxEStDiqklgQ_ZYSFoVgLtokf3PM"; // ganti dengan ID spreadsheet Anda
-    const SHEET_NAME = "DATABASE SISWA"; // nama sheet
+    const SHEET_ID = "1LWHkjnO6BZ-QC9CjxEStDiqklgQ_ZYSFoVgLtokf3PM"; 
+    const SHEET_NAME = "IDCard"; // tab baru untuk data ID Card
     const API_URL = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
 
-    async function verifyStudent() {
-      const params = new URLSearchParams(window.location.search);
-      const nis = params.get("nis");
-      const resultDiv = document.getElementById("result");
+    async function cekIDCard() {
+      const nis = document.getElementById('nisInput').value.trim();
+      const resultDiv = document.getElementById('result');
+      resultDiv.innerHTML = '';
 
       if (!nis) {
-        resultDiv.innerHTML = "<p>ID/NIS tidak ditemukan di URL.</p>";
+        resultDiv.innerHTML = '<p>Mohon masukkan NIS siswa.</p>';
         return;
       }
 
@@ -39,24 +56,26 @@
         const response = await fetch(API_URL);
         const data = await response.json();
 
-        const student = data.find(r => r["NIS"] === nis);
+        // Cari siswa berdasarkan NIS
+        const siswa = data.find(r => r['NIS'] === nis);
 
-        if (student) {
+        if (siswa) {
           resultDiv.innerHTML = `
-            <img src="${student["FOTO"]}" alt="Foto Siswa">
-            <p><b>Nama:</b> ${student["NAMA"]}</p>
-            <p><b>Sekolah:</b> ${student["SEKOLAH"]}</p>
-            <p style="color:green;"><b>Status:</b> Benar siswa JR Education ✅</p>
+            <div class="card">
+              <h3>${siswa['Nama Siswa']}</h3>
+              <p>NIS: ${siswa['NIS']}</p>
+              <p class="valid">${siswa['Status']}</p>
+            </div>
           `;
         } else {
-          resultDiv.innerHTML = "<p style='color:red;'>Data siswa tidak ditemukan.</p>";
+          resultDiv.innerHTML = `<p class="invalid">Data siswa dengan NIS ${nis} tidak ditemukan.</p>`;
         }
+
       } catch (error) {
-        resultDiv.innerHTML = "<p>Gagal mengambil data.</p>";
+        console.error(error);
+        resultDiv.innerHTML = '<p>Terjadi kesalahan saat mengambil data.</p>';
       }
     }
-
-    verifyStudent();
   </script>
 </body>
 </html>
