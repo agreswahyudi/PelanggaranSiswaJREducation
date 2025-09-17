@@ -3,86 +3,85 @@
 <head>
   <meta charset="UTF-8">
   <title>ID Card Siswa JR EDUCATION</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin: 30px;
-      background: #f4f6f9;
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      color: #fff;
     }
     .card {
-      display: inline-block;
-      padding: 20px;
-      border: 2px solid #333;
-      border-radius: 12px;
       background: #fff;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      max-width: 350px;
+      color: #2a2a2a;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+      max-width: 400px;
+      text-align: center;
+      animation: fadeIn 0.8s ease-in-out;
     }
-    img {
-      width: 150px;
-      height: auto;
-      border-radius: 8px;
-      margin-top: 10px;
-      border: 2px solid #555;
+    .card h2 {
+      margin-bottom: 15px;
+      font-weight: 700;
+      color: #1e3c72;
     }
-    h2 {
-      margin-bottom: 10px;
-      color: #222;
+    .info {
+      text-align: left;
+      margin-top: 15px;
     }
-    p {
+    .info p {
       margin: 6px 0;
       font-size: 16px;
+    }
+    .info b {
+      color: #1e3c72;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
   <div id="hasil">
-    <p>Sedang memuat data siswa...</p>
+    <p>⏳ Sedang memuat data siswa...</p>
   </div>
 
   <script>
-    // Ambil parameter dari URL (?nis=...)
     const params = new URLSearchParams(window.location.search);
     const nis = params.get("nis");
 
-    // Link JSON dari Google Sheet (pakai opensheet.elk.sh)
     const sheetURL = "https://opensheet.elk.sh/1LWHkjnO6BZ-QC9CjxEStDiqklgQ_ZYSFoVgLtokf3PM/IDCard";
-
-    // Fungsi untuk ubah link Google Drive jadi direct link
-    function fixDriveLink(url) {
-      if (!url) return "";
-      const match = url.match(/\/d\/([^/]+)\//);
-      if (match) {
-        return "https://drive.google.com/uc?export=view&id=" + match[1];
-      }
-      return url; // kalau sudah direct link
-    }
 
     fetch(sheetURL)
       .then(res => res.json())
       .then(data => {
-        const siswa = data.find(s => s.NIS === nis);
+        const siswa = data.find(s => (s.NIS || "").replace(/\D/g, "") === (nis || "").replace(/\D/g, ""));
         const hasilDiv = document.getElementById("hasil");
 
         if (siswa) {
-          const fotoUrl = fixDriveLink(siswa.FOTO || "");
           hasilDiv.innerHTML = `
             <div class="card">
               <h2>Siswa berikut merupakan siswa JR EDUCATION</h2>
-              <p><b>Nama:</b> ${siswa.NAMA}</p>
-              <p><b>NIS:</b> ${siswa.NIS}</p>
-              <p><b>Sekolah:</b> ${siswa.SEKOLAH || "-"}</p>
-              ${fotoUrl ? `<img src="${fotoUrl}" alt="Foto Siswa">` : "<p><i>Foto tidak tersedia</i></p>"}
+              <div class="info">
+                <p><b>Nama:</b> ${siswa.NAMA}</p>
+                <p><b>NIS:</b> ${siswa.NIS}</p>
+                <p><b>Sekolah:</b> ${siswa.SEKOLAH || "-"}</p>
+              </div>
             </div>
           `;
         } else {
-          hasilDiv.innerHTML = "<p style='color:red'>❌ Data siswa tidak ditemukan</p>";
+          hasilDiv.innerHTML = "<div class='card'><h2>❌ Data siswa tidak ditemukan</h2></div>";
         }
       })
       .catch(err => {
         console.error("Error:", err);
-        document.getElementById("hasil").innerHTML = "<p style='color:red'>⚠️ Terjadi kesalahan saat mengambil data</p>";
+        document.getElementById("hasil").innerHTML = "<div class='card'><h2>⚠️ Terjadi kesalahan saat mengambil data</h2></div>";
       });
   </script>
 </body>
